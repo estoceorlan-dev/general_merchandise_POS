@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_breakpoints.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/metric_tile.dart';
+import '../../../../shared/providers/app_providers.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final pendingSyncCount = ref
+        .watch(syncStateProvider)
+        .when(
+          data: (state) => state.pendingChanges.toString(),
+          error: (_, _) => '!',
+          loading: () => '…',
+        );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -40,23 +49,23 @@ class DashboardPage extends StatelessWidget {
                     style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: AppSpacing.xl),
-                  const Wrap(
+                  Wrap(
                     spacing: AppSpacing.lg,
                     runSpacing: AppSpacing.lg,
                     children: [
-                      MetricTile(
+                      const MetricTile(
                         title: 'Today sales',
                         value: 'PHP 0.00',
                         detail: 'Waiting for POS transactions',
                         icon: Icons.payments_outlined,
                       ),
-                      MetricTile(
+                      const MetricTile(
                         title: 'Open carts',
                         value: '0',
                         detail: 'No active registers yet',
                         icon: Icons.shopping_bag_outlined,
                       ),
-                      MetricTile(
+                      const MetricTile(
                         title: 'Low stock',
                         value: '0',
                         detail: 'Inventory schema pending',
@@ -64,8 +73,8 @@ class DashboardPage extends StatelessWidget {
                       ),
                       MetricTile(
                         title: 'Pending sync',
-                        value: '0',
-                        detail: 'Offline queue ready for Drift',
+                        value: pendingSyncCount,
+                        detail: 'Commands waiting in the local outbox',
                         icon: Icons.cloud_sync_outlined,
                       ),
                     ],

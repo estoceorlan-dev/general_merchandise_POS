@@ -1,17 +1,24 @@
-import 'user_role.dart';
+import 'organization_access.dart';
 
 class AppUser {
   const AppUser({
-    required this.id,
+    required this.firebaseUid,
     required this.email,
     required this.displayName,
-    required this.role,
-    required this.branchId,
+    required this.organizations,
   });
 
-  final String id;
+  final String firebaseUid;
   final String email;
   final String displayName;
-  final UserRole role;
-  final String branchId;
+  final List<OrganizationAccess> organizations;
+
+  OrganizationAccess? organizationById(String organizationId) {
+    for (final organization in organizations) {
+      if (organization.organization.id == organizationId) {
+        return organization;
+      }
+    }
+    return null;
+  }
 }

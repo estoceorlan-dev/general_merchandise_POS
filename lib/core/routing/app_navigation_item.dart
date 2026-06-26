@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/domain/entities/auth_session.dart';
+import '../../shared/models/permission.dart';
 import 'app_route.dart';
 
 class AppNavigationItem {
@@ -14,6 +16,7 @@ class AppNavigationItem {
   final IconData selectedIcon;
 
   String get label => route.label;
+  AppPermission get permission => route.requiredPermission!;
 }
 
 const appNavigationItems = <AppNavigationItem>[
@@ -68,3 +71,9 @@ const appNavigationItems = <AppNavigationItem>[
     selectedIcon: Icons.settings,
   ),
 ];
+
+List<AppNavigationItem> navigationItemsForSession(AuthSession session) {
+  return appNavigationItems
+      .where((item) => session.can(item.permission))
+      .toList(growable: false);
+}

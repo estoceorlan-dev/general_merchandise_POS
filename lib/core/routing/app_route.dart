@@ -1,3 +1,5 @@
+import '../../shared/models/permission.dart';
+
 enum AppRoute {
   auth,
   dashboard,
@@ -53,5 +55,19 @@ extension AppRouteInfo on AppRoute {
     AppRoute.logs => 'Logs',
     AppRoute.users => 'Users',
     AppRoute.settings => 'Settings',
+  };
+
+  AppPermission? get requiredPermission => switch (this) {
+    AppRoute.auth => null,
+    AppRoute.dashboard => AppPermission.viewDashboard,
+    AppRoute.pos => AppPermission.processSales,
+    AppRoute.products => AppPermission.manageProducts,
+    AppRoute.inventory => AppPermission.manageInventory,
+    AppRoute.transfers => AppPermission.approveTransfers,
+    AppRoute.purchases => AppPermission.createPurchases,
+    AppRoute.reports => AppPermission.viewReports,
+    AppRoute.logs => AppPermission.viewAuditLogs,
+    AppRoute.users => AppPermission.manageUsers,
+    AppRoute.settings => AppPermission.manageSettings,
   };
 }

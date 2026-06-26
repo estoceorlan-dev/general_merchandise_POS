@@ -51,28 +51,26 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBsUXwe-qEwdzyQMlVysoDYuMoumPwlMaM',
-    appId: '1:259528988373:android:0b42b9b2718bfcf3acb45c',
+    appId: '1:259528988373:android:b3ef9cf40e2ade9eacb45c',
     messagingSenderId: '259528988373',
     projectId: 'jce-pos',
     storageBucket: 'jce-pos.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAMMWjYZ60PK5E1Me_OygcxcxmONmyen94',
-    appId: '1:259528988373:ios:f33532bed443e437acb45c',
+    appId: '1:259528988373:ios:de706f8745e2a89cacb45c',
     messagingSenderId: '259528988373',
     projectId: 'jce-pos',
     storageBucket: 'jce-pos.firebasestorage.app',
-    iosBundleId: 'com.example.jcePos',
+    iosBundleId: 'com.jce.pos',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAMMWjYZ60PK5E1Me_OygcxcxmONmyen94',
-    appId: '1:259528988373:ios:f33532bed443e437acb45c',
+    appId: '1:259528988373:ios:de706f8745e2a89cacb45c',
     messagingSenderId: '259528988373',
     projectId: 'jce-pos',
     storageBucket: 'jce-pos.firebasestorage.app',
-    iosBundleId: 'com.example.jcePos',
+    iosBundleId: 'com.jce.pos',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

@@ -1,11 +1,11 @@
 {
-    "name": "jce_pos",
-    "short_name": "jce_pos",
+    "name": "JCE POS",
+    "short_name": "JCE POS",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F8FAFC",
+    "theme_color": "#2563EB",
+    "description": "Offline-first multi-branch point of sale system.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

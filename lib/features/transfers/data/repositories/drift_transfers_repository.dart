@@ -1,3 +1,4 @@
+import '../../../../shared/models/business_context.dart';
 import '../../domain/repositories/transfers_repository.dart';
 
 class DriftTransfersRepository implements TransfersRepository {
@@ -5,7 +6,7 @@ class DriftTransfersRepository implements TransfersRepository {
 
   @override
   Future<void> queueBranchTransfer({
-    required String sourceBranchId,
+    required BusinessContext context,
     required String destinationBranchId,
     required String productId,
     required num quantity,

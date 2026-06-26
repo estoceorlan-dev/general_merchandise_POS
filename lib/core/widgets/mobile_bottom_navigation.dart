@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../routing/app_navigation_item.dart';
+import '../routing/app_route.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
 import '../theme/app_spacing.dart';
@@ -9,13 +10,13 @@ class MobileBottomNavigation extends StatelessWidget {
   const MobileBottomNavigation({
     super.key,
     required this.items,
-    required this.selectedIndex,
+    required this.selectedRoute,
     required this.onDestinationSelected,
   });
 
   final List<AppNavigationItem> items;
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
+  final AppRoute selectedRoute;
+  final ValueChanged<AppNavigationItem> onDestinationSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +44,8 @@ class MobileBottomNavigation extends StatelessWidget {
                 for (var index = 0; index < items.length; index++)
                   _MobileDestination(
                     item: items[index],
-                    selected: selectedIndex == index,
-                    onTap: () => onDestinationSelected(index),
+                    selected: selectedRoute == items[index].route,
+                    onTap: () => onDestinationSelected(items[index]),
                   ),
               ],
             ),

@@ -1,48 +1,25 @@
-import 'user_role.dart';
-
 enum AppPermission {
-  viewDashboard,
-  processSales,
-  manageProducts,
-  manageInventory,
-  approveTransfers,
-  createPurchases,
-  viewReports,
-  viewAuditLogs,
-  manageUsers,
-  manageSettings,
-}
+  viewDashboard('dashboard.view'),
+  processSales('sales.process'),
+  manageProducts('products.manage'),
+  manageInventory('inventory.manage'),
+  approveTransfers('transfers.approve'),
+  createPurchases('purchases.create'),
+  viewReports('reports.view'),
+  viewAuditLogs('audit_logs.view'),
+  manageUsers('users.manage'),
+  manageSettings('settings.manage');
 
-const rolePermissions = <UserRole, Set<AppPermission>>{
-  UserRole.owner: {...AppPermission.values},
-  UserRole.admin: {...AppPermission.values},
-  UserRole.manager: {
-    AppPermission.viewDashboard,
-    AppPermission.processSales,
-    AppPermission.manageProducts,
-    AppPermission.manageInventory,
-    AppPermission.approveTransfers,
-    AppPermission.createPurchases,
-    AppPermission.viewReports,
-    AppPermission.viewAuditLogs,
-  },
-  UserRole.cashier: {AppPermission.viewDashboard, AppPermission.processSales},
-  UserRole.inventoryClerk: {
-    AppPermission.viewDashboard,
-    AppPermission.manageProducts,
-    AppPermission.manageInventory,
-    AppPermission.approveTransfers,
-    AppPermission.createPurchases,
-  },
-  UserRole.auditor: {
-    AppPermission.viewDashboard,
-    AppPermission.viewReports,
-    AppPermission.viewAuditLogs,
-  },
-};
+  const AppPermission(this.code);
 
-extension RolePermissionChecks on UserRole {
-  bool can(AppPermission permission) {
-    return rolePermissions[this]?.contains(permission) ?? false;
+  final String code;
+
+  static AppPermission? fromCode(String code) {
+    for (final permission in values) {
+      if (permission.code == code.trim()) {
+        return permission;
+      }
+    }
+    return null;
   }
 }

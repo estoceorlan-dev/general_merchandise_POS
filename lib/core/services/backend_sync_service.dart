@@ -1,7 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../shared/models/business_context.dart';
+import '../config/app_config.dart';
+
 final backendEndpointConfigProvider = Provider<BackendEndpointConfig>((ref) {
-  return const BackendEndpointConfig();
+  return BackendEndpointConfig(
+    apiBaseUri: ref.watch(appConfigProvider).apiBaseUri,
+  );
 });
 
 final backendSyncServiceProvider = Provider<BackendSyncService>((ref) {
@@ -21,8 +26,8 @@ class BackendEndpointConfig {
 }
 
 abstract interface class BackendSyncService {
-  Future<void> pushPendingChanges();
-  Future<void> pullLatestChanges({String? branchId});
+  Future<void> pushPendingChanges({required BusinessContext context});
+  Future<void> pullLatestChanges({required BusinessContext context});
 }
 
 class DeferredBackendSyncService implements BackendSyncService {
@@ -31,14 +36,14 @@ class DeferredBackendSyncService implements BackendSyncService {
   final BackendEndpointConfig config;
 
   @override
-  Future<void> pullLatestChanges({String? branchId}) {
+  Future<void> pullLatestChanges({required BusinessContext context}) {
     throw UnimplementedError(
       'Configure a PostgreSQL-backed API before enabling remote sync.',
     );
   }
 
   @override
-  Future<void> pushPendingChanges() {
+  Future<void> pushPendingChanges({required BusinessContext context}) {
     throw UnimplementedError(
       'Configure a PostgreSQL-backed API before enabling remote sync.',
     );

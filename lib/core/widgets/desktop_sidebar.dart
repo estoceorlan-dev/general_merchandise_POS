@@ -1,28 +1,50 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/domain/entities/auth_session.dart';
 import '../constants/app_constants.dart';
 import '../routing/app_navigation_item.dart';
+import '../routing/app_route.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_radii.dart';
 import '../theme/app_spacing.dart';
+import 'sidebar/sidebar_action.dart';
+import 'sidebar/sidebar_branch_badge.dart';
+import 'sidebar/sidebar_logo.dart';
+import 'sidebar/sidebar_user_panel.dart';
 
 class DesktopSidebar extends StatelessWidget {
   const DesktopSidebar({
     super.key,
     required this.items,
-    required this.selectedIndex,
+    required this.selectedRoute,
+    required this.session,
     required this.onDestinationSelected,
+    required this.onSettingsSelected,
+    required this.onBranchSelected,
+    required this.onRefreshAccess,
+    required this.onLogout,
   });
 
+  static const _logoAsset = 'assets/images/jce_logo.jpg';
+
   final List<AppNavigationItem> items;
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
+  final AppRoute selectedRoute;
+  final AuthSession session;
+  final ValueChanged<AppNavigationItem> onDestinationSelected;
+  final VoidCallback onSettingsSelected;
+  final BranchSelectionCallback onBranchSelected;
+  final VoidCallback onRefreshAccess;
+  final VoidCallback onLogout;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
+    final mainItems = items
+        .where((item) => item.route != AppRoute.settings)
+        .toList();
+    final canOpenSettings = items.any(
+      (item) => item.route == AppRoute.settings,
+    );
 
     return Container(
       width: AppSpacing.sidebarWidth,
@@ -38,157 +60,70 @@ class DesktopSidebar extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.xl,
-                AppSpacing.xl,
-                AppSpacing.xl,
-                AppSpacing.lg,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      borderRadius: BorderRadius.circular(AppRadii.md),
-                    ),
-                    child: const Text(
-                      'J',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppConstants.appName,
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        Text(
-                          'Offline-first POS',
-                          style: theme.textTheme.labelMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            const SidebarLogo(
+              asset: _logoAsset,
+              title: AppConstants.appName,
+              subtitle: 'Dry Goods Trading',
             ),
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                itemCount: items.length,
+                itemCount: mainItems.length,
                 separatorBuilder: (context, index) =>
                     const SizedBox(height: AppSpacing.xs),
                 itemBuilder: (context, index) {
-                  final item = items[index];
-                  return _SidebarDestination(
-                    item: item,
-                    selected: index == selectedIndex,
-                    onTap: () => onDestinationSelected(index),
+                  final item = mainItems[index];
+                  return SidebarAction(
+                    label: item.label,
+                    icon: item.route == selectedRoute
+                        ? item.selectedIcon
+                        : item.icon,
+                    selected: item.route == selectedRoute,
+                    onTap: () => onDestinationSelected(item),
                   );
                 },
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppRadii.md),
-                  border: Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.slate200,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SidebarUserPanel(session: session),
+                  const SizedBox(height: AppSpacing.md),
+                  if (canOpenSettings) ...[
+                    SidebarAction(
+                      label: 'Settings',
+                      icon: selectedRoute == AppRoute.settings
+                          ? Icons.settings
+                          : Icons.settings_outlined,
+                      selected: selectedRoute == AppRoute.settings,
+                      onTap: onSettingsSelected,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                  ],
+                  SidebarAction(
+                    label: 'Refresh access',
+                    icon: Icons.refresh,
+                    onTap: onRefreshAccess,
                   ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.storefront_outlined,
-                        color: colorScheme.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          'Branch: Main Store',
-                          style: theme.textTheme.labelLarge,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: AppSpacing.xs),
+                  SidebarAction(
+                    label: 'Logout',
+                    icon: Icons.logout,
+                    onTap: onLogout,
+                    destructive: true,
                   ),
-                ),
+                  const SizedBox(height: AppSpacing.lg),
+                  SidebarBranchBadge(
+                    session: session,
+                    onSelected: onBranchSelected,
+                  ),
+                ],
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SidebarDestination extends StatelessWidget {
-  const _SidebarDestination({
-    required this.item,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final AppNavigationItem item;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadii.md),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.md,
-          ),
-          decoration: BoxDecoration(
-            color: selected
-                ? colorScheme.primary.withValues(alpha: 0.1)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppRadii.md),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                selected ? item.selectedIcon : item.icon,
-                color: selected ? colorScheme.primary : colorScheme.onSurface,
-                size: 21,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  item.label,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: selected
-                        ? colorScheme.primary
-                        : colorScheme.onSurface,
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

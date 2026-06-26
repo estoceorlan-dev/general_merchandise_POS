@@ -1,4 +1,4 @@
-package com.example.jce_pos
+package com.jce.pos
 
 import io.flutter.embedding.android.FlutterActivity
 

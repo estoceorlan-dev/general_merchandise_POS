@@ -2,14 +2,66 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jce_pos/app.dart';
+import 'package:jce_pos/core/config/app_config.dart';
+import 'package:jce_pos/core/config/app_environment.dart';
 
 void main() {
-  testWidgets('JCE POS starts on the dashboard', (WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: JcePosApp()));
+  const testConfig = AppConfig(
+    environment: AppEnvironment.development,
+    enableDemoAuth: true,
+    enableDiagnostics: true,
+    demoBranchId: 'test-branch',
+  );
+
+  testWidgets('JCE POS starts on the login page', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appConfigProvider.overrideWithValue(testConfig)],
+        child: const JcePosApp(),
+      ),
+    );
     await tester.pumpAndSettle();
 
-    expect(find.text('JCE POS'), findsWidgets);
+    expect(find.text('JCE'), findsOneWidget);
+    expect(find.text('Dry Goods Trading'), findsOneWidget);
+    expect(find.text('Sign in to your workspace'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Password'), findsOneWidget);
+    expect(find.text('Forgot password?'), findsOneWidget);
+    expect(find.text('Login'), findsOneWidget);
+  });
+
+  testWidgets('hardcoded cashier login opens a role shell', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appConfigProvider.overrideWithValue(testConfig)],
+        child: const JcePosApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Email'),
+      'cashier@jce.test',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Password'),
+      'password123',
+    );
+    await tester.tap(find.text('Login'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Dashboard'), findsWidgets);
-    expect(find.byIcon(Icons.point_of_sale_outlined), findsWidgets);
+    expect(find.text('Cashier Staff'), findsOneWidget);
+    expect(find.text('Cashier'), findsWidgets);
+    expect(find.text('POS'), findsWidgets);
+    expect(find.text('Reports'), findsNothing);
   });
 }

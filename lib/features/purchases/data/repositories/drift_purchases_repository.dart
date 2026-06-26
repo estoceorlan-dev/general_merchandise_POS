@@ -1,3 +1,4 @@
+import '../../../../shared/models/business_context.dart';
 import '../../domain/repositories/purchases_repository.dart';
 
 class DriftPurchasesRepository implements PurchasesRepository {
@@ -5,8 +6,8 @@ class DriftPurchasesRepository implements PurchasesRepository {
 
   @override
   Future<void> queuePurchaseOrder({
+    required BusinessContext context,
     required String supplierId,
-    required String branchId,
   }) {
     throw UnimplementedError(
       'Add Drift purchase tables before queueing purchase orders.',

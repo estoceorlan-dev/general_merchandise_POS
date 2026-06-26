@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/presentation/pages/auth_placeholder_page.dart';
+import '../../features/auth/domain/entities/auth_session.dart';
+import '../../features/auth/presentation/controllers/auth_controller.dart';
+import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/inventory/presentation/pages/inventory_page.dart';
 import '../../features/logs/presentation/pages/logs_page.dart';
@@ -14,18 +16,47 @@ import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/transfers/presentation/pages/transfers_page.dart';
 import '../../features/users/presentation/pages/users_page.dart';
 import '../widgets/app_navigation_shell.dart';
+import 'app_navigation_item.dart';
 import 'app_route.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  final currentUser = ref.watch(authControllerProvider);
+  final session = currentUser.asData?.value;
   final router = GoRouter(
-    initialLocation: AppRoute.dashboard.path,
+    initialLocation: session == null
+        ? AppRoute.auth.path
+        : AppRoute.dashboard.path,
+    redirect: (context, state) {
+      final isAuthRoute = state.matchedLocation == AppRoute.auth.path;
+
+      if (currentUser.isLoading) {
+        return isAuthRoute ? null : AppRoute.auth.path;
+      }
+
+      if (session == null) {
+        return isAuthRoute ? null : AppRoute.auth.path;
+      }
+
+      if (isAuthRoute) {
+        return _firstAccessiblePath(session);
+      }
+
+      final route = _routeForLocation(state.matchedLocation);
+      final permission = route?.requiredPermission;
+      final hasAccess = permission == null || session.can(permission);
+
+      if (hasAccess) {
+        return null;
+      }
+      return _firstAccessiblePath(session) ?? AppRoute.auth.path;
+    },
     routes: [
       GoRoute(
         path: AppRoute.auth.path,
         name: AppRoute.auth.routeName,
         pageBuilder: (context, state) => NoTransitionPage<void>(
           key: state.pageKey,
-          child: const AuthPlaceholderPage(),
+          child: const LoginPage(),
         ),
       ),
       StatefulShellRoute.indexedStack(
@@ -51,6 +82,29 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   ref.onDispose(router.dispose);
   return router;
 });
+
+String? _firstAccessiblePath(AuthSession session) {
+  for (final item in appNavigationItems) {
+    if (session.can(item.permission)) {
+      return item.route.path;
+    }
+  }
+  return null;
+}
+
+AppRoute? _routeForLocation(String location) {
+  for (final item in appNavigationItems) {
+    if (item.route.path == location) {
+      return item.route;
+    }
+  }
+
+  if (location == AppRoute.auth.path) {
+    return AppRoute.auth;
+  }
+
+  return null;
+}
 
 StatefulShellBranch _branch(AppRoute route, Widget child) {
   return StatefulShellBranch(

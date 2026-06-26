@@ -1,23 +1,26 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../firebase_options.dart';
+import '../config/app_config.dart';
+import '../startup/app_initialization_service.dart';
+
 final firebaseInitializationServiceProvider =
-    Provider<FirebaseInitializationService>((ref) {
+    Provider<AppInitializationService>((ref) {
       return const FirebaseInitializationService();
     });
 
-class FirebaseInitializationService {
+class FirebaseInitializationService implements AppInitializationService {
   const FirebaseInitializationService();
 
-  Future<FirebaseApp> initialize({FirebaseOptions? options, String? name}) {
+  @override
+  Future<void> initialize(AppConfig config) async {
     if (Firebase.apps.isNotEmpty) {
-      return Future.value(name == null ? Firebase.app() : Firebase.app(name));
+      return;
     }
 
-    if (options != null) {
-      return Firebase.initializeApp(name: name, options: options);
-    }
-
-    return Firebase.initializeApp(name: name);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   }
 }
